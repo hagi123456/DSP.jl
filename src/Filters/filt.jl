@@ -134,7 +134,7 @@ struct DF2TFilter{T<:FilterCoefficients,S<:Array}
     state::S
 
     function DF2TFilter{Ti,Si}(coef::PolynomialRatio, state::Vector) where {Ti,Si}
-        length(state) == length(coef.a)-1 == length(coef.b)-1 ||
+        length(state) == max(length(coef.a), length(coef.b))-1 ||
             throw(ArgumentError("length of state vector must match filter order"))
         new{Ti,Si}(coef, state)
     end
@@ -158,6 +158,11 @@ function filt!(out::AbstractVector, f::DF2TFilter{PolynomialRatio{T},Vector{S}},
     length(x) != length(out) && throw(ArgumentError("out size must match x"))
 
     si = f.state
+    function DF2TFilter{Ti,Si}(coef::PolynomialRatio, state::Vector) where {Ti,Si}
+        length(state) == length(coef.a)-1 == length(coef.b)-1 ||
+            throw(ArgumentError("length of state vector must match filter order"))
+        new{Ti,Si}(coef, state)
+    end
     # Note: these are in the Polynomials.jl convention, which is
     # reversed WRT the usual DSP convention
     b = f.coef.b.a
