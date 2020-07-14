@@ -1,5 +1,6 @@
 !(dirname(@__FILE__) in LOAD_PATH) && push!(LOAD_PATH, dirname(@__FILE__))
 using DSP, Test, FilterTestHelpers, Polynomials
+using Polynomials.PolyCompat
 
 @testset "convert to SOS" begin
     # Test conversion to SOS against MATLAB
@@ -233,9 +234,13 @@ end
     @test Biquad(2.0, 0.0, 0.0, 0.0, 0.0)*2 == Biquad(4.0, 0.0, 0.0, 0.0, 0.0)
     @test convert(Biquad{Float64}, f1) == convert(Biquad, f1)
     f = PolynomialRatio(Float64[1.0], Float64[1.0])
-    empty!(f.b.a)
-    empty!(f.a.a)
+
+    # I don't understand why this tests is necessary, it's impossible to make a
+    # PolynomialRatio with empty coefficients in the first place.
+    empty!(f.b.coeffs)
+    empty!(f.a.coeffs)
     @test_throws ArgumentError convert(Biquad, f)
+
     @test_throws ArgumentError convert(SecondOrderSections, ZeroPoleGain([0.5 + 0.5im, 0.5 + 0.5im], [0.5 + 0.5im, 0.5 - 0.5im], 1))
     @test_throws ArgumentError convert(SecondOrderSections, ZeroPoleGain([0.5 + 0.5im, 0.5 - 0.5im], [0.5 + 0.5im, 0.5 + 0.5im], 1))
 
